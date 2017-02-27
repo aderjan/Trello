@@ -11,36 +11,39 @@ $(function() {
 
 	function Column(name) {
 	    var self = this; 
-
 	    this.id = randomString();
 	    this.name = name;
-	    this.$element = createColumn();
+	    this.createColumn(this);
+	}
 
-	    function createColumn() {
-	    	var $column = $('<div>').addClass('column');
+	Column.prototype = {
+    	addCard: function(card) {
+      		this.$element.children('ul').append(card.$element);
+    	},
+    	createColumn: function(self) {
+    		var $column = $('<div>').addClass('column');
 			var $columnTitle = $('<h2>').addClass('column-title').text(self.name);
 			var $columnCardList = $('<ul>').addClass('column-card-list');
 			var $columnDelete = $('<button>').addClass('btn-delete').text('x');
 			var $columnAddCard = $('<button>').addClass('add-card').text('Dodaj kartę');
-	 	}
+	 	
 	    	$columnDelete.click(function() {
-        		self.removeColumn();
+        		self.removeColumn(self);
 			});
 
 			$columnAddCard.click(function() {
-        		self.addCard(new Card(prompt("Wpisz nazwę karty")));
+				var cardName = prompt("Wpisz nazwę karty")
+				if (cardName != null) {
+					var card = new Card(cardName);
+					self.addCard(card);
+				}
 			});
 
 			$column.append($columnTitle)
         		.append($columnDelete)
         		.append($columnAddCard)
         		.append($columnCardList);
-			return $column;
-	}
-
-	Column.prototype = {
-    	addCard: function(card) {
-      		this.$element.children('ul').append(card.$element);
+			self.$element = $column;
     	},
     	removeColumn: function() {
       		this.$element.remove();
@@ -66,15 +69,13 @@ $(function() {
 			$card.append($cardDelete)
 				.append($cardDescription);
 			return $card;
-
 		}
+	}
 
-		Card.prototype = {
-			removeCard: function() {
-				this.$element.remove();
-			}
+	Card.prototype = {
+		removeCard: function() {
+			this.$element.remove();
 		}
-
 	}
 
 	var board = {
@@ -88,10 +89,8 @@ $(function() {
 
 	addColumn: function column () {
 	this.$element.append(column.$element);
-	initSortable(); //O tej funkcji jeszcze sobie powiemy
+	initSortable(); 
 	}
-
-	$('#board .column-container')
 
 	function initSortable() {
 	    $('.column-card-list').sortable({
@@ -103,8 +102,10 @@ $(function() {
   	$('.create-column')
   		.click(function(){
 			var name = prompt('Wpisz nazwę kolumny');
-			var column = new Column(name);
-    		board.addColumn(column);
+			if (name != null) {
+				var column = new Column(name);
+    			board.addColumn(column);
+			}
   	});
 
   	// TWORZENIE KOLUMN
